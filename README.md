@@ -1,4 +1,4 @@
-# REST Webservices
+# RESTful Webservices
 
 * Distributed Application makes components of same or different servers belonging to same or different machines
 communicate and exchange data.
@@ -128,3 +128,38 @@ is sent as query string along with URL.
 * We can have multiple request paths for an EndPoint because value parameter of @GetMapping is String[].
   * @GetMapping(value={"/staticPath/{pathVar1}/{pathVar2}","/staticPath/{pathVar}"})
 * RestTemplate
+  * It allows to develop the consumer app for the RESTful producer app in java environment.
+  * RestTemplate object does not come through autoconfiguration process, it must be created either using 'new' operator
+  or using @Bean method in @Configuration class.
+  * RestTemplate, just like JdbcTemplate, JndiTemplate, NamedParameterJdbcTemplate, etc are given based on Template
+  method design pattern.
+  * RestTemplate.xxxxForEntity(String,Class) returns object of ResponseEntity<T>
+  * Handy methods of ResponseEntity: getBody(),getStatusCodeValue(), getStatusCode().name()
+    * These methods are useful once you get the ResponseEntity Object using RestTemplate Object
+  * RestTemplate.xxxxForObject(String,Class) returns object of <T> which is just response body without 
+  response headers and response status code.
+  * RestTemplate.xxxxForEntity(String,Class,Map<String,?>) and RestTemplate.xxxxForEntity(String,Class,Object...) 
+  used for passing path variables.
+  * RestTemplate.xxxxForObject(String,Class,Map<String,?>) and RestTemplate.xxxxForObject(String,Class,Object...)
+  used for passing path variables.
+  * Sending XML/JSON data to producer app using RestTemplate with POST request.
+  ```
+  String json_body = "{\"key1\":value1,\"key2\":value2}";
+  //or use ObjectMapper.writeValueAsString(Class) method of Jackson API
+  HttpHeaders headers = new HttpHeaders();
+  headers.setContentType(MediaType.APPLICATION_JSON);
+  HttpEntity<String> request = new HttpEntity<String>(json_body,headers);
+  ResponseEntity<String> response = new RestTemplate().postForEntity(endPointUrl,request,String.class);
+  
+  /*
+  ResponseEntity<String>: response is string because, though the EndPoint returns Object(i.e ResponseEntity<Class>), 
+  List of Objects(i.e ResponseEntity<List<Class>>),... the consumer app by default receives everything in JSON format 
+  in the form of String.
+  Remember, 'Accept' of request header by default */* which generates response in JSON format.
+  Also remember, the response you got using the Postman tool, it is in JSON format which is String.
+  */
+  ```
+  * RestTemplate.exchange(String,HttpMethod,@Nullable HttpEntity<?>,Class,Object...)
+  * Always receive response from the producer app as String and then convert it to other object types if needed.
+    * Converting Response Body of JSON string to java Object (DeSerialization) using Jackson API's ObjectMapper.readValue(String,Class).
+    * Converting java Object to JSON string (Serialization) using Jackson API's ObjectMapper.writeValueAsString(Class).
